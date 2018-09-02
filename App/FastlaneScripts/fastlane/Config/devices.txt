@@ -1,0 +1,2 @@
+Device ID	Device Name
+95bd5d055f4d8275f25110855bc136ee7e9e4c51	iPhone X Sento

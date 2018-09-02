@@ -1,0 +1,11 @@
+
+basePath = "./fastlane/"
+configPath = basePath + "Config/"
+
+git_url "TODO"
+# File.read(configPath + "certs_repo_url.txt")
+
+type "development" # [appstore | adhoc | development]
+
+app_identifier File.read(configPath + "app_identifier.txt")
+username File.read(configPath + "apple_id.txt")

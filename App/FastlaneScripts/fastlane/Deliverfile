@@ -1,0 +1,85 @@
+###################### More Options ######################
+# If you want to have even more control, check out the documentation
+# https://github.com/KrauseFx/deliver/blob/master/Deliverfile.md
+
+
+basePath = "./fastlane/"
+metadataPath = basePath + "metadata/"
+
+#
+# Review information
+#
+
+app_version File.read(metadataPath + "currentVersion.txt")
+
+app_icon metadataPath + "AppIcon.png"
+
+
+
+#
+# Pricing
+#
+
+price_tier 0
+
+#
+# Copyright
+#
+
+copyright "#{Time.now.year}" + " " + File.read(metadataPath +"copyright.txt")
+
+#
+# Rating
+#
+
+app_rating_config_path metadataPath + "ratings.json"
+
+
+#
+# Review information
+#
+
+app_review_information(
+  first_name: "TODO",
+  last_name: "TODO",
+  phone_number: "+34 TODO",
+  email_address: "TODO",
+  demo_user: "TODO",
+  demo_password: "TODO",
+  notes: "TODO"
+)
+
+
+#
+# Release Configuration
+#
+
+automatic_release true
+
+
+submission_information({
+  
+  add_id_info_uses_idfa: false,
+  add_id_info_serves_ads: false,
+  add_id_info_tracks_action: false,
+  add_id_info_tracks_install: false,
+  add_id_info_limits_tracking: false,
+
+  content_rights_contains_third_party_content: false,
+  content_rights_has_rights: false,
+
+
+  export_compliance_available_on_french_store: true,
+#   export_compliance_ccat_file: ,
+  export_compliance_contains_proprietary_cryptography: false,
+  export_compliance_contains_third_party_cryptography: false,
+
+#  export_compliance_app_type: ,
+
+  export_compliance_uses_encryption: false,
+  export_compliance_encryption_updated: false,
+  export_compliance_compliance_required: false,
+  export_compliance_is_exempt: false,
+#  export_compliance_platform: ,
+
+})

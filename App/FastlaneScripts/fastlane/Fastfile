@@ -1,0 +1,418 @@
+# Customise this file, documentation can be found here:
+# https://github.com/KrauseFx/fastlane/tree/master/docs
+# All available actions: https://github.com/KrauseFx/fastlane/blob/master/docs/Actions.md
+# can also be listed using the `fastlane actions` command
+
+# Change the syntax highlighting to Ruby
+# All lines starting with a # are ignored when running `fastlane`
+
+# By default, fastlane will send which actions are used
+# No personal data is shared, more information on https://github.com/fastlane/enhancer
+# Uncomment the following line to opt out
+# opt_out_usage
+
+# If you want to automatically update fastlane if a new version is available:
+# update_fastlane
+
+# This is the minimum version number required.
+
+fastlane_version "1.11.0"
+
+default_platform :ios
+
+platform :ios do
+  
+  before_all do
+        
+    # ENV["SLACK_URL"] = "https://hooks.slack.com/services/..."
+
+    #cocoapods
+
+    # increment_build_number
+
+    # ipa({
+    #   scheme: ""
+    # })
+
+    #xctool # run the tests of your app
+  end
+
+
+  
+  ## 
+  ## Create in App Store
+  ## 
+
+  desc "Create in app store"
+  lane :create do
+    produce(
+      username: File.read("Config/apple_id.txt"), 
+      app_identifier: File.read("Config/app_identifier.txt"), 
+      app_name: File.read("Config/name.txt"),
+      company_name: File.read("Config/company_name.txt"),
+      language: "English",
+      app_version: File.read("metadata/currentVersion.txt"),
+      sku: File.read("Config/app_identifier.txt")
+    )
+
+  end
+
+
+  ## 
+  ## Create Enterprise
+  ## 
+  desc "Create for enterprise"
+  lane :createEnterprise do
+    produce(
+      username: File.read("Config/Enterprise/apple_id.txt"), 
+      app_identifier: File.read("Config/Enterprise/app_identifier.txt"), 
+      app_name: File.read("Config/name.txt"),
+      language: "English",
+      app_version: File.read("metadata/currentVersion.txt"),
+      sku: File.read("Config/Enterprise/app_identifier.txt")
+    )
+
+  end
+ 
+
+  ##
+  ## Generate Certs & Push & Profiles
+  ##
+  
+  lane :certsPushProfiles do
+
+  	push_dev
+  	push_prod
+  	match_adhoc
+
+  end
+
+
+  ##
+  ## Match for all certificates
+  ##
+
+  lane :certificates do
+
+    match_appstore
+    match_development
+    match_adhoc
+
+  end
+
+  lane :match_appstore do
+    match(
+        type: "appstore",
+        force: false,
+        git_url: File.read("Config/certs_repo_url.txt"),
+        app_identifier: File.read("Config/app_identifier.txt"),
+        username: File.read("Config/apple_id.txt")
+      )
+  end
+
+   lane :match_development do
+    register_devices(devices_file: "fastlane/Config/devices.txt") 
+    match(
+      git_url: File.read("Config/certs_repo_url.txt"),
+      force: false,
+      app_identifier: File.read("Config/app_identifier.txt"),
+      type: "development",
+      username: File.read("Config/apple_id.txt")
+    )
+  end
+
+  lane :match_adhoc do
+    match(
+      git_url: File.read("Config/certs_repo_url.txt"),
+      force: false,
+      app_identifier: File.read("Config/app_identifier.txt"),
+      type: "adhoc",
+      username: File.read("Config/apple_id.txt")
+    )
+  end
+
+
+
+  ##
+  ## Match for enterprise certificates
+  ##
+
+  lane :match_enterprise do
+
+  	match_enterprise_dev
+  	match_enterprise_release
+
+  end
+
+
+  ##
+  ## Match for enterprise dev
+  ##
+
+  lane :match_enterprise_dev do
+
+  	match(
+  		git_url: File.read("Config/Enterprise/certs_repo_url.txt"),
+  		app_identifier: File.read("Config/Enterprise/app_identifier.txt"),
+  		type: "development",
+  		username: File.read("Config/Enterprise/apple_id.txt")
+  	)
+
+  end
+
+
+  ##
+  ## Match for enterprise release
+  ##
+
+  lane :match_enterprise_release do
+
+  	match(
+  		git_url: File.read("Config/Enterprise/certs_repo_url.txt"),
+  		app_identifier: File.read("Config/Enterprise/app_identifier.txt"),
+  		type: "appstore",
+  		username: File.read("Config/Enterprise/apple_id.txt"),
+      force: false,
+      force_for_new_devices: false
+  	)
+
+  end
+
+
+  ##
+  ## Push DEV-Enterprise
+  ##
+
+
+  desc "Generate Dev certs"
+  lane :push_dev_enterprise do
+    
+    pem(development: true,
+        generate_p12: true,
+        save_private_key: true,
+        p12_password: File.read("Config/push_password.txt"),
+        new_profile: Proc.new do |profile_path|
+          puts "------ New .p12 generated ------" + profile_path.yellow
+          end)
+
+    match_enterprise_dev
+
+    ENV["PROFILE_UUID"] = lane_context[SharedValues::SIGH_UDID]
+
+
+  end
+
+
+  ##
+  ## Push PROD-Enterprise
+  ##
+
+
+  desc "Generate Dev certs"
+  lane :push_prod_enterprise do
+    
+    pem(development: false,
+        generate_p12: true,
+        save_private_key: true,
+        p12_password: File.read("Config/push_password.txt"),
+        new_profile: Proc.new do |profile_path|
+          puts "------ New .p12 generated ------" + profile_path.yellow
+          end)
+
+    match_enterprise_release
+
+    ENV["PROFILE_UUID"] = lane_context[SharedValues::SIGH_UDID]
+
+
+  end
+
+
+  ##
+  ## Push DEV
+  ##
+
+
+  desc "Generate Dev certs"
+  lane :push_dev do
+    
+    pem(development: true,
+        generate_p12: true,
+        save_private_key: true,
+        p12_password: File.read("Config/push_password.txt"),
+        new_profile: Proc.new do |profile_path|
+          puts "------ New .p12 generated ------" + profile_path.yellow
+          end)
+
+    match_development
+
+    ENV["PROFILE_UUID"] = lane_context[SharedValues::SIGH_UDID]
+
+
+  end
+
+
+
+  ## 
+  ## Push PROD
+  ## 
+
+  desc "Generate Prod Push certs"
+  lane :push_prod do
+    
+    pem(generate_p12: true,
+        save_private_key: true,
+        p12_password: File.read("Config/push_password.txt"),
+        new_profile: Proc.new do |profile_path|
+          puts "------ New .p12 generated ------" + profile_path.yellow
+          end)
+
+    match_appstore
+
+    ENV["PROFILE_UUID"] = lane_context[SharedValues::SIGH_UDID]
+
+  end
+
+
+  ## 
+  ## Push DEMO
+  ## 
+
+  desc "Generate Demo Push certs"
+  lane :push_demo do
+    
+    pem(generate_p12: true,
+        save_private_key: true,
+        p12_password: File.read("Config/push_password.txt"),
+        new_profile: Proc.new do |profile_path|
+          puts "------ New .p12 generated ------" + profile_path.yellow
+          end)
+
+    certificates
+
+    ENV["PROFILE_UUID"] = lane_context[SharedValues::SIGH_UDID]
+
+
+  end
+
+
+  ##
+  ## Build IPA
+  ##
+
+  desc "Build app"
+  lane :build_app do
+
+    gym(
+      workspace: "../Code/" + File.read("./Config/workspace.txt") + ".xcworkspace",
+      scheme: File.read("Config/scheme.txt"),
+      # xcargs: "CODE_SIGN_IDENTITY='...' PROVISIONING_PROFILE='#{ENV["PROFILE_UDID"]}'",
+      configuration: "Release",
+      clean: true,
+      silent: true
+    )
+
+  end
+
+
+  ## 
+  ## Test App
+  ## 
+
+  desc "Test app"
+  lane :test_app do
+    xctool :test,["-workspace", "../Code/" + File.read("./Config/workspace.txt") + ".xcworkspace",
+            "-scheme", File.read("Config/scheme.txt"),
+            "-configuration","Release",
+            "-sdk","iphoneos"].join(" ")
+  end
+
+
+  ## 
+  ## Test
+  ## 
+
+  desc "Runs all the tests"
+  lane :test do
+    cocoapods
+    build_app
+    test_app
+  end
+  
+  
+  ## 
+  ## Screenshots
+  ## 
+
+  desc "Takes screenshots for configured devices/languages"
+  lane :screenshots do
+
+    snapshot
+
+  end
+  
+  
+  ## 
+  ## Update App Store Metadata
+  ## 
+
+  desc "Update App Store metadata"
+  lane :metadata do
+
+    deliver(force: true,
+        skip_screenshots: false,
+        skip_metadata: false)
+
+  end
+
+
+  ## 
+  ## Upload ipa
+  ## 
+
+  desc "Deploy a new version to the App Store"
+  lane :uploadIpa do
+
+      push_prod
+ 
+      build_app
+             
+      deliver(force: true,
+        skip_screenshots: true,
+        skip_metadata: true)
+    
+  end
+
+
+  ## 
+  ## Deploy to App Store & Beta ITC
+  ## 
+
+  desc "Deploy a new version to the App Store"
+  lane :deploy do
+
+      push_prod
+ 
+      build_app
+             
+      deliver(force: true)
+
+  end
+
+
+
+  after_all do |lane|
+    # This block is called, only if the executed lane was successful
+    # slack(message: "The lane " + lane + " completed successfully")
+  end
+
+
+  error do |lane, exception|
+    # slack(message: exception.message,
+    #       success: false)
+  end
+
+end
+
+
+# More information:
+# https://github.com/KrauseFx/fastlane/blob/master/docs/Platforms.md

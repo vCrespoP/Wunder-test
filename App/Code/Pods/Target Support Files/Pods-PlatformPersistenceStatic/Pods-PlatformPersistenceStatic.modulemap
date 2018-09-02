@@ -1,0 +1,6 @@
+framework module Pods_PlatformPersistenceStatic {
+  umbrella header "Pods-PlatformPersistenceStatic-umbrella.h"
+
+  export *
+  module * { export * }
+}

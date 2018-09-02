@@ -1,0 +1,228 @@
+### Configuration
+
+inhibit_all_warnings!
+use_frameworks!
+
+platform :ios, '10.0'
+
+source 'https://github.com/CocoaPods/Specs.git'
+
+project 'Project/Project.xcodeproj'
+workspace 'App'
+
+ENV['COCOAPODS_DISABLE_STATS'] = "true"
+
+def app_pods
+
+
+    # Version tracking
+    pod 'AppVersionMonitor', '~> 1.3.1'
+
+    # Google Analytics
+    #    pod 'Google/Analytics'
+
+    # Crash System
+    pod 'Fabric', '~> 1.7.6'
+    pod 'Crashlytics', '~> 3.9.3'
+
+    # Architecture
+    pod 'ReSwift', '~> 4.0.1'
+
+    ## User Interface
+
+    # Async image + Caching
+    pod 'Kingfisher', '~> 4.6.4'
+
+    # Keyboard Manager
+    pod 'IQKeyboardManager', '~> 5.0.8'
+    pod 'IQDropDownTextField', '~> 1.1.1'
+    
+    # Floating labels
+    pod 'SkyFloatingLabelTextField', '~> 3.3.0'
+
+    # Autolayout
+    pod 'PureLayout', '~> 3.0.2'
+
+    # Notification messages
+    pod 'Whisper', '~> 6.0'
+
+    # Progress HUD
+    pod 'PKHUD', '~> 5.0.0'
+
+    # Date management
+    pod 'AFDateHelper', '~> 4.2.5'
+
+    # Device type
+    pod 'DeviceKit', '~> 1.4.0'
+
+    ### Notifications
+
+    # Notifications Mocker
+    pod 'SimulatorRemoteNotifications', '~> 0.0.3'
+
+    # Logs
+    pod 'Log'
+
+    ### Auto-Generation
+    pod 'Sourcery', '~> 0.14.0'
+
+    ### Standard conventions
+    pod 'SwiftLint', '~> 0.24'
+		
+end
+
+def shared_pods
+    
+    # Reactive
+    pod 'RxSwift', '~> 4.0'
+    pod 'RxCocoa', '~> 4.0'
+        
+end
+
+
+### Main Application
+
+target 'Project' do
+    
+    shared_pods
+    app_pods
+    
+    # Test Application
+    
+    target 'ProjectTests' do
+        inherit! :search_paths
+        # pod 'Firebase/Core' # Needed for tests. Thx Google
+        
+    end
+    
+    target 'ProjectUITests' do
+        inherit! :search_paths
+        
+    end
+
+end
+
+
+### Domain
+
+target 'Domain' do
+    
+    shared_pods
+    
+    pod 'ReSwift', '~> 4.0.1'
+	    
+    # Test Application
+    target 'DomainTests' do
+        inherit! :search_paths
+        
+    end
+    
+end
+	
+### Network
+
+target 'NetworkSpecific' do
+    
+    shared_pods
+    
+    inherit! :search_paths
+end
+
+
+target 'PlatformNetworkApi' do
+
+    shared_pods
+
+    # Reachability
+    pod 'ReachabilitySwift'
+    
+    inherit! :search_paths
+end
+
+target 'NetworkKitAlamofire' do
+
+    pod 'Alamofire', '~> 4.7.3'
+
+    inherit! :search_paths
+end
+
+target 'PlatformNetworkStatic' do
+
+    shared_pods
+
+    inherit! :search_paths
+end
+
+### Persistence
+
+target 'PersistenceSpecific' do
+    
+    shared_pods
+    
+    inherit! :search_paths
+end
+
+target 'PlatformPersistenceDisk' do
+    
+    shared_pods
+    
+    inherit! :search_paths
+end
+
+target 'PlatformPersistenceDiskTests' do
+    
+    shared_pods
+    
+    inherit! :search_paths
+end
+
+target 'PlatformPersistenceStatic' do
+    
+    shared_pods
+    
+    inherit! :search_paths
+    
+end
+
+target 'PlatformPersistenceStaticTests' do
+    inherit! :search_paths
+end
+
+### Shared Utils
+
+target 'SharedUtils' do
+    
+    shared_pods
+    
+    # Random
+    pod 'RandomKit',
+        :git => 'https://github.com/buscarini/RandomKit.git'
+    
+end
+
+
+## Post actions
+
+post_install do |installer|
+    
+    puts "Setting Swift legacy for some Pods"
+    installer.pods_project.targets.each do |target|
+        target.build_configurations.each do |config|
+            if [
+                'AppVersionMonitor',
+                'SkyFloatingLabelTextField',
+                'Log',
+                'ReachabilitySwift'
+                ].include?(target.name)
+                config.build_settings['SWIFT_VERSION'] = '3.2'
+            end
+        end
+        
+    end
+    
+end
+
+
+
+
+

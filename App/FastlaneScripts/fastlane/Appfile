@@ -1,0 +1,12 @@
+apple_id File.read("Config/apple_id.txt")
+app_identifier File.read("Config/app_identifier.txt")
+
+for_lane :push_dev_enterprise do
+	apple_id File.read("Config/Enterprise/apple_id.txt")
+	app_identifier File.read("Config/Enterprise/app_identifier.txt")
+end
+
+for_lane :push_prod_enterprise do
+	apple_id File.read("Config/Enterprise/apple_id.txt")
+	app_identifier File.read("Config/Enterprise/app_identifier.txt")
+end
